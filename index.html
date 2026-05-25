@@ -3,57 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TD Mobile Console</title>
+    <title>Sexto Sentido - Mobile Console</title>
     <style>
         body { 
-            margin: 0; padding: 0; background: #111; 
+            margin: 0; padding: 0; background: #0a0a0a; 
             display: flex; flex-direction: column; align-items: center; justify-content: flex-start; 
-            min-height: 100vh; font-family: sans-serif; overflow: hidden;
+            min-height: 100vh; font-family: 'Courier New', Courier, monospace; overflow: hidden;
+            color: #00ffcc;
         }
         
-        /* Botones adaptados para dedos en pantallas táctiles */
+        /* PANTALLA DE BIENVENIDA (SPLASH PAGE) */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #050505; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 99999;
+            transition: opacity 0.8s ease-out, visibility 0.8s;
+        }
+        #splash-screen.oculto {
+            opacity: 0; visibility: hidden;
+        }
+        .logo-container {
+            text-align: center; position: relative; margin-bottom: 40px;
+        }
+        .logo-main {
+            font-size: 32px; font-weight: bold; letter-spacing: 6px;
+            text-shadow: 0 0 15px rgba(0, 255, 204, 0.6); margin: 0;
+        }
+        .logo-sub {
+            font-size: 11px; letter-spacing: 3px; color: #888; margin: 5px 0 0 0;
+        }
+        /* Botón de inicio futurista */
+        #btn-iniciar {
+            background: transparent; color: #00ffcc; border: 2px solid #00ffcc;
+            padding: 15px 35px; font-size: 14px; font-weight: bold; font-family: inherit;
+            letter-spacing: 2px; cursor: pointer; border-radius: 4px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2); transition: all 0.3s;
+            animation: pulso 2s infinite; display: none; /* Se activa cuando la cámara esté lista */
+        }
+        #btn-iniciar:active {
+            background: #00ffcc; color: #0a0a0a; box-shadow: 0 0 25px #00ffcc;
+        }
+        /* Animación de Carga */
+        .loader {
+            width: 40px; height: 40px; border: 3px solid rgba(0, 255, 204, 0.1);
+            border-radius: 50%; border-top-color: #00ffcc; animation: spin 1s infinite linear;
+        }
+        #status-carga { font-size: 11px; margin-top: 15px; color: #00ffcc; letter-spacing: 1px; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulso { 
+            0% { box-shadow: 0 0 10px rgba(0,255,204,0.2); }
+            50% { box-shadow: 0 0 25px rgba(0,255,204,0.6); border-color: #00ffff; }
+            100% { box-shadow: 0 0 10px rgba(0,255,204,0.2); }
+        }
+
+        /* INTERFAZ PRINCIPAL DE LA APP */
         #consola { 
-            display: flex; width: 90%; gap: 8px; margin: 15px 0; 
-            background: #222; padding: 8px; border-radius: 8px; border: 1px solid #333; 
+            display: flex; width: 92%; gap: 10px; margin: 20px 0 15px 0; 
+            background: #111; padding: 6px; border-radius: 6px; border: 1px solid #222; 
         }
-
-        button { 
-            flex: 1; background: #333; color: #00ffcc; border: 1px solid #00ffcc; 
-            padding: 12px 5px; cursor: pointer; border-radius: 6px; 
-            font-weight: bold; font-size: 11px; text-transform: uppercase;
+        .btn-modo { 
+            flex: 1; background: #1a1a1a; color: #888; border: 1px solid #333; 
+            padding: 14px 5px; cursor: pointer; border-radius: 4px; font-family: inherit;
+            font-weight: bold; font-size: 11px; text-transform: uppercase; transition: all 0.2s;
         }
-
-        button.activo { 
-            background: #00ffcc; color: #111; box-shadow: 0 0 10px rgba(0,255,204,0.5); 
+        .btn-modo.activo { 
+            background: #111; color: #00ffcc; border-color: #00ffcc;
+            text-shadow: 0 0 5px rgba(0,255,204,0.5); box-shadow: inset 0 0 8px rgba(0,255,204,0.2);
         }
-        
-        /* Contenedor responsivo para el lienzo del efecto */
-        #contenedor-canvas {
-            width: 95%; max-width: 500px; display: flex; justify-content: center;
-        }
-
-        canvas { 
-            width: 100%; height: auto; background: #000; 
-            border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-
-        #mensaje { 
-            position: absolute; top: 40%; color: #00ffcc; text-align: center; 
-            font-size: 15px; background: rgba(0,0,0,0.85); padding: 15px; 
-            border-radius: 8px; border: 1px solid #00ffcc; width: 70%; max-width: 300px;
-        }
+        #contenedor-canvas { width: 95%; max-width: 500px; display: flex; justify-content: center; }
+        canvas { width: 100%; height: auto; background: #000; border-radius: 6px; border: 1px solid #222; }
     </style>
 </head>
 <body>
 
-    <div id="consola">
-        <button id="btn-normal" class="activo" onclick="cambiarModo('normal')">Normal</button>
-        <button id="btn-efecto" onclick="cambiarModo('efecto')">Efecto</button>
-        <button id="btn-objetos" onclick="cambiarModo('objetos')">Escáner</button>
+    <!-- PANTALLA DE BIENVENIDA (SPLASH PAGE) -->
+    <div id="splash-screen">
+        <div class="logo-container">
+            <h1 class="logo-main">SEXTO SENTIDO</h1>
+            <p class="logo-sub">VISUAL ENGINE CORE v1.0</p>
+        </div>
+        <div id="loader-icon" class="loader"></div>
+        <p id="status-carga">INICIALIZANDO SISTEMA...</p>
+        <button id="btn-iniciar" onclick="iniciarAplicacion()">INICIAR ESCANEO</button>
     </div>
 
-    <div id="mensaje">Iniciando cámara del dispositivo...</div>
-    
+    <!-- CONSOLA PRINCIPAL -->
+    <div id="consola">
+        <button id="btn-normal" class="btn-modo activo" onclick="cambiarModo('normal')">Normal</button>
+        <button id="btn-efecto" class="btn-modo" onclick="cambiarModo('efecto')">Efecto TD</button>
+        <button id="btn-objetos" class="btn-modo" onclick="cambiarModo('objetos')">Datos CHOP</button>
+    </div>
+
     <div id="contenedor-canvas">
         <canvas id="lienzo"></canvas>
     </div>
